@@ -1,0 +1,163 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ── Geo Survey Tech HRMS design-system tokens ── */
+:root {
+  --font-sans: 'Plus Jakarta Sans', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+
+  font-family: var(--font-sans);
+  font-feature-settings: 'tnum' 1, 'cv11' 1;
+  color-scheme: light;
+  font-size: 15px;
+
+  --bg: #F2F5F9;        --surface: #FFFFFF;     --surface-2: #EDF1F7;
+  --border: #E4E9F1;    --border-2: #C9D2E0;
+  --tx: #131A2B;        --tx2: #69738A;         --tx3: #98A1B4;
+  --pri: #29ABE2;       --pri-bg: #E3F3FC;      --pri-d: #1B87B8;
+  --ink: #26308C;       --ink-2: #3D49B5;       --ink-bg: #E9EBFA;
+  --ok: #0E9F6E;        --ok-bg: #E3F7EF;
+  --warn: #B7791F;      --warn-bg: #FDF3DC;
+  --bad: #D64550;       --bad-bg: #FCE9EA;
+  --app-canvas:
+    radial-gradient(ellipse at 8% 6%, rgb(41 171 226 / 14%) 0%, transparent 36%),
+    radial-gradient(ellipse at 92% 12%, rgb(38 48 140 / 13%) 0%, transparent 40%),
+    radial-gradient(ellipse at 60% 96%, rgb(41 171 226 / 10%) 0%, transparent 38%),
+    linear-gradient(135deg, #EEF4FB 0%, #F6F8FB 50%, #E9F3F9 100%);
+  --glass-chrome: rgb(255 255 255 / 62%);
+  --glass-sheen: rgb(255 255 255 / 34%);
+  /* Deep navy → cyan sweep shared by the login hero, the payroll highlight card and announcement tiles. */
+  --brand-sweep: linear-gradient(150deg, #1B2470 0%, #26308C 42%, #1E7FB4 100%);
+
+  /* Navy used for solid chips (tab-active pill, avatar initials, modal header) that always pair
+     with white text; goes neutral graphite in dark mode instead of staying navy-blue. */
+  --ink-solid: #26308C;
+}
+
+/* ── dark theme: cool slate ground, cyan accent lifted for contrast on dark surfaces ── */
+:root.dark {
+  color-scheme: dark;
+
+  --bg: #12161F;        --surface: #1A1F2B;     --surface-2: #232936;
+  --border: #2B3341;    --border-2: #3D4759;
+  --tx: #E3E7EF;        --tx2: #98A2B6;         --tx3: #6C7689;
+  --pri: #3BB7EC;       --pri-bg: #0F2C3D;      --pri-d: #6ACBF5;
+  --ink: #8E9BEE;       --ink-2: #7986E0;       --ink-bg: #1E2438;
+  --ok: #34D399;        --ok-bg: #0E2A22;
+  --warn: #E8B75A;      --warn-bg: #2C2413;
+  --bad: #F1707B;       --bad-bg: #33161A;
+  --ink-solid: #26308C;
+  --app-canvas:
+    radial-gradient(ellipse at 8% 6%, rgb(41 171 226 / 16%) 0%, transparent 36%),
+    radial-gradient(ellipse at 92% 12%, rgb(38 48 140 / 28%) 0%, transparent 42%),
+    radial-gradient(ellipse at 60% 96%, rgb(41 171 226 / 10%) 0%, transparent 38%),
+    linear-gradient(135deg, #131926 0%, #171B25 50%, #101821 100%);
+  --glass-chrome: rgb(26 31 43 / 66%);
+  --glass-sheen: rgb(255 255 255 / 7%);
+}
+
+* { box-sizing: border-box; }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+input[type="number"] { -moz-appearance: textfield; appearance: textfield; }
+
+html,
+body,
+#root {
+  height: 100%;
+  overflow: hidden;
+}
+
+@supports (height: 100dvh) {
+  body,
+  #root {
+    height: 100dvh;
+  }
+}
+
+/* Uniform 80% UI scale on desktop so dense tables fit without shrinking mobile layouts. */
+@media (min-width: 1024px) {
+  html,
+  body,
+  #root {
+    height: 125vh;
+  }
+
+  html {
+    zoom: 0.8;
+  }
+}
+
+@supports (height: 100dvh) {
+  @media (min-width: 1024px) {
+    html,
+    body,
+    #root {
+      height: 125dvh;
+    }
+  }
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  background-color: var(--bg);
+  color: var(--tx);
+}
+
+.liquid-glass-canvas {
+  isolation: isolate;
+  background: var(--app-canvas);
+}
+
+.liquid-glass-canvas::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background: linear-gradient(112deg, var(--glass-sheen) 0%, transparent 34%, var(--glass-sheen) 68%, transparent 100%);
+}
+
+::-webkit-scrollbar { width: 9px; height: 9px; }
+::-webkit-scrollbar-thumb { background: var(--border-2); border-radius: 99px; }
+::-webkit-scrollbar-track { background: transparent; }
+
+.no-scrollbar { scrollbar-width: none; -ms-overflow-style: none; }
+.no-scrollbar::-webkit-scrollbar { width: 0; height: 0; display: none; }
+
+/* Thicker, always-visible scrollbar for wide scrollable tables. */
+.table-scroll::-webkit-scrollbar { width: 12px; height: 12px; }
+.table-scroll::-webkit-scrollbar-track { background: var(--surface-2); }
+.table-scroll::-webkit-scrollbar-thumb { background: var(--border-2); border-radius: 99px; border: 2px solid var(--surface-2); }
+.table-scroll::-webkit-scrollbar-thumb:hover { background: var(--tx3); }
+.table-scroll { scrollbar-color: var(--border-2) var(--surface-2); }
+
+/* ── shared entrance/decorative motion ── */
+@keyframes gsFade { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+@keyframes gsPop { from { opacity: 0; transform: scale(.96); } to { opacity: 1; transform: none; } }
+@keyframes gsSlideIn { from { opacity: 0; transform: translateX(-10px); } to { opacity: 1; transform: none; } }
+@keyframes gsDrift { 0%, 100% { transform: translate(0, 0); } 50% { transform: translate(8px, -14px); } }
+
+@media (prefers-reduced-motion: no-preference) {
+  .gs-fade { animation: gsFade .45s ease both; }
+  .gs-pop { animation: gsPop .22s ease both; }
+  .gs-slide-in { animation: gsSlideIn .4s ease both; }
+  .gs-drift { animation: gsDrift 18s ease-in-out infinite; }
+}
+
+/* ── login form autofill ── */
+.glass-form input:-webkit-autofill,
+.glass-form input:-webkit-autofill:hover,
+.glass-form input:-webkit-autofill:focus {
+  -webkit-text-fill-color: var(--tx) !important;
+  caret-color: var(--tx) !important;
+  -webkit-box-shadow: 0 0 0 1000px var(--surface) inset !important;
+  box-shadow: 0 0 0 1000px var(--surface) inset !important;
+  background-color: transparent !important;
+  background-clip: padding-box !important;
+  border-color: var(--border-2) !important;
+  transition: background-color 9999s ease-out 0s;
+}
