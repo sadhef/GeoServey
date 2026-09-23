@@ -34,7 +34,7 @@ const AppRoutes = () => {
   return (
     <>
       <Toaster
-        position="bottom-center"
+        position="top-right"
         toastOptions={{
           duration: 3000,
           style: {

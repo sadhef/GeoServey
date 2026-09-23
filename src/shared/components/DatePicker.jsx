@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { CalendarBlankIcon, CaretLeftIcon, CaretRightIcon } from '@phosphor-icons/react';
+import { formatDate } from '../utils/date.js';
 
 const WEEKDAYS = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
 
@@ -73,9 +74,7 @@ const DatePicker = ({ value, onChange, placeholder = 'Select date' }) => {
   const leadingBlanks = firstOfMonth.getDay();
   const cells = [...Array(leadingBlanks).fill(null), ...Array(daysInMonth).keys()].map((d) => (d === null ? null : d + 1));
 
-  const displayLabel = selected
-    ? selected.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })
-    : placeholder;
+  const displayLabel = selected ? formatDate(selected) : placeholder;
 
   const pick = (day) => {
     const date = new Date(viewMonth.getFullYear(), viewMonth.getMonth(), day);

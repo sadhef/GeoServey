@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { XIcon } from '@phosphor-icons/react';
 import toast from 'react-hot-toast';
 import { getTypes, applyLeave } from '../services/leaveService.js';
 import DatePicker from '../../../shared/components/DatePicker.jsx';
@@ -64,9 +65,19 @@ const ApplyLeaveModal = ({ open, onClose }) => {
         aria-labelledby="apply-leave-title"
         className="gs-pop my-auto max-h-[calc(100vh-2rem)] w-full max-w-[520px] overflow-hidden overflow-y-auto overscroll-contain rounded-2xl bg-[var(--surface)] shadow-[0_30px_70px_rgba(0,0,0,0.36)] supports-[height:100dvh]:max-h-[calc(100dvh-2rem)]"
       >
-        <div className="bg-[var(--ink-solid)] px-7 py-[22px] text-white">
-          <h2 id="apply-leave-title" className="m-0 text-xl font-semibold">New Leave Request</h2>
-          <p className="m-0 mt-1 text-sm text-white/70">Routed to your reporting manager for approval.</p>
+        <div className="flex items-start justify-between gap-3 border-b border-[var(--border)] bg-[var(--surface)] px-7 py-[22px] text-[var(--tx)]">
+          <div>
+            <h2 id="apply-leave-title" className="m-0 text-xl font-semibold">New Leave Request</h2>
+            <p className="m-0 mt-1 text-sm text-[var(--tx2)]">Routed to your reporting manager for approval.</p>
+          </div>
+          <button
+            type="button"
+            aria-label="Close"
+            onClick={onClose}
+            className="flex h-9 w-9 flex-shrink-0 cursor-pointer items-center justify-center rounded-[9px] border-0 bg-transparent text-[var(--tx2)] hover:bg-[var(--surface-2)] hover:text-[var(--tx)] focus-visible:outline-2 focus-visible:outline-[var(--pri)] focus-visible:outline-offset-2"
+          >
+            <XIcon size={18} />
+          </button>
         </div>
 
         <div className="flex flex-col gap-[15px] px-7 py-[26px]">

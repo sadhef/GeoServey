@@ -6,12 +6,14 @@ export const parseOdooTimestamp = (value) => {
   return Number.isNaN(date.getTime()) ? null : date;
 };
 
-/** Formats a Date/date-string as "12 May 2025", or a dash when absent. */
+const SHORT_MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+/** Formats a Date/date-string as "26/Sep/2026", or a dash when absent. */
 export const formatDate = (value) => {
   if (!value) return '-';
   const date = value instanceof Date ? value : new Date(value);
   if (Number.isNaN(date.getTime())) return '-';
-  return date.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+  return `${String(date.getDate()).padStart(2, '0')}/${SHORT_MONTHS[date.getMonth()]}/${date.getFullYear()}`;
 };
 
 /** Formats a from/to date pair as a single date, or a "12 May 2025 - 16 May 2025" range. */
