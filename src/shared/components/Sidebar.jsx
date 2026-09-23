@@ -22,9 +22,7 @@ const NAV_GROUPS = [
   {
     label: 'Company',
     items: [
-      { to: '/documents', label: 'Documents', icon: 'file' },
       { to: '/announcements', label: 'Announcements', icon: 'megaphone' },
-      { to: '/directory', label: 'Team Directory', icon: 'users' },
     ],
   },
 ];

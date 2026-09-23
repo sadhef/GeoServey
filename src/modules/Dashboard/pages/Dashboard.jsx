@@ -16,8 +16,6 @@ const SERVICES = [
   { to: '/attendance', label: 'Attendance', desc: 'Site check-ins and hours', icon: 'siteCheckIn' },
   { to: '/leave', label: 'Leave Requests', desc: 'Apply for leave or check balance', icon: 'calendar' },
   { to: '/payslips', label: 'Payroll', desc: 'View your salary slips', icon: 'receipt' },
-  { to: '/documents', label: 'Documents', desc: 'Access company documents', icon: 'file' },
-  { to: '/directory', label: 'Directory', desc: 'Find survey and BIM teams', icon: 'users' },
 ];
 
 const ANNOUNCEMENTS = [
@@ -42,7 +40,14 @@ const Dashboard = () => {
   const [applyOpen, setApplyOpen] = useState(false);
 
   const profileQuery = useQuery({ queryKey: ['profile'], queryFn: getProfile });
-  const todayQuery = useQuery({ queryKey: ['attendance', 'today'], queryFn: () => listAttendance({ dateFrom: new Date(), dateTo: new Date() }) });
+  const todayQuery = useQuery({
+    queryKey: ['attendance', 'today'],
+    queryFn: () => {
+      const now = new Date();
+      return listAttendance({ dateFrom: now, dateTo: now });
+    },
+    refetchInterval: 60_000,
+  });
   const weekQuery = useQuery({
     queryKey: ['attendance', 'week'],
     queryFn: () => {
@@ -55,8 +60,8 @@ const Dashboard = () => {
   const balancesQuery = useQuery({ queryKey: ['leave', 'balances'], queryFn: getBalances });
   const listQuery = useQuery({ queryKey: ['leave', 'list'], queryFn: getLeaveList });
 
-  const todayRecord = todayQuery.data?.[0];
-  const isCheckedIn = !!todayRecord && !todayRecord.checkOut;
+  const latestRecord = todayQuery.data?.[0];
+  const activeRecord = todayQuery.data?.find((record) => !record.checkOut);
   const pendingCount = (listQuery.data || []).filter((r) => PENDING_STATES.includes(r.state)).length;
   const recentRequests = useMemo(() => (listQuery.data || []).slice(0, 4), [listQuery.data]);
 
@@ -88,7 +93,7 @@ const Dashboard = () => {
   // `live` marks the one tile whose icon reports state rather than just labelling the tile: while the
   // user is checked in at a site, the map pin is the only accent-bearing glyph on the screen.
   const statCards = [
-    { icon: 'siteCheckIn', title: 'Check In', value: todayRecord ? formatTime(todayRecord.checkIn) : '-', foot: isCheckedIn ? 'Today' : 'Not checked in yet', live: isCheckedIn },
+    { icon: 'siteCheckIn', title: 'Attendance', value: activeRecord ? formatTime(activeRecord.checkIn) : latestRecord ? formatTime(latestRecord.checkOut) : '-', foot: activeRecord ? 'In progress' : latestRecord ? 'Checked out' : 'No punches today', live: !!activeRecord },
     { icon: 'calendar', title: 'Leave Balance', value: balancesQuery.data ? String(balancesQuery.data.totalRemaining) : '-', foot: 'Days available' },
     { icon: 'pending', title: 'Pending', value: String(pendingCount).padStart(2, '0'), foot: 'Requests awaiting approval' },
     { icon: 'chart', title: 'Hours This Week', value: totalWeekLabel, foot: `Across ${weekBars.length} working days` },
@@ -122,7 +127,6 @@ const Dashboard = () => {
               className="gs-fade relative overflow-hidden rounded-[14px] border border-[var(--border)] bg-[var(--surface)] p-5 transition-[background-color,border-color] duration-200 hover:border-[var(--border-2)] hover:bg-[var(--surface-2)]"
               style={{ animationDelay: `${i * 0.06}s` }}
             >
-              {title === 'Pending' && pendingCount > 0 && <div className="absolute inset-x-0 top-0 h-[3px] bg-[var(--pri)]" />}
               <div className="flex items-start justify-between gap-3">
                 <div className="text-[12.5px] font-semibold uppercase tracking-[0.08em] text-[var(--tx2)]">{title}</div>
                 <div className={`grid h-[38px] w-[38px] flex-shrink-0 place-items-center rounded-[9px] ${live ? 'bg-[var(--pri-bg)]' : 'bg-[var(--ink-bg)]'}`}>

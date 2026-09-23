@@ -73,8 +73,17 @@ export const EmptyState = ({ label, actionLabel, onAction }) => (
   </div>
 );
 
-/** Page title, subtitle, and an optional primary action button - shared header for every HR content page. */
-export const PageHeader = ({ title, subtitle, actionLabel, onAction }) => (
+/**
+ * Renders an HR page title and optional primary action.
+ * @param {object} props - Header configuration.
+ * @param {string} props.title - Page title.
+ * @param {string} [props.subtitle] - Supporting description.
+ * @param {string} [props.actionLabel] - Primary action text.
+ * @param {() => void} [props.onAction] - Primary action handler.
+ * @param {boolean} [props.actionDisabled=false] - Whether the primary action is unavailable.
+ * @returns {JSX.Element} Page header.
+ */
+export const PageHeader = ({ title, subtitle, actionLabel, onAction, actionDisabled = false }) => (
   <div className="flex flex-wrap items-start justify-between gap-4 sm:items-end sm:gap-5">
     <div className="min-w-0">
       <h1 className="m-0 break-words text-[26px] font-medium tracking-[-0.01em] text-[var(--tx)] sm:text-[30px]">{title}</h1>
@@ -84,7 +93,8 @@ export const PageHeader = ({ title, subtitle, actionLabel, onAction }) => (
       <button
         type="button"
         onClick={onAction}
-        className="min-h-11 w-full cursor-pointer rounded-xl border-0 bg-[var(--pri)] px-[22px] py-3 text-[15px] font-bold text-white transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_12px_24px_rgba(41,171,226,0.32)] sm:w-auto"
+        disabled={actionDisabled}
+        className="min-h-11 w-full cursor-pointer rounded-xl border-0 bg-[var(--pri)] px-[22px] py-3 text-[15px] font-bold text-white transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_12px_24px_rgba(41,171,226,0.32)] disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:translate-y-0 disabled:hover:shadow-none sm:w-auto"
       >
         {actionLabel}
       </button>
@@ -160,6 +170,7 @@ const compareTableValues = (left, right) => {
  */
 export const DataTable = ({ columns, rows, statusColumn }) => {
   const [sortState, setSortState] = useState({ key: null, direction: null });
+  const [filters, setFilters] = useState({});
   const activeColumn = sortState.key === null ? null : columns.find((column) => column.key === sortState.key);
   const groupedHeaders = [];
   columns.forEach((column) => {
@@ -172,24 +183,24 @@ export const DataTable = ({ columns, rows, statusColumn }) => {
   });
   const hasGroupedHeaders = groupedHeaders.some((group) => group.label !== null);
   const lastColumnKey = columns[columns.length - 1].key;
+  const filteredRows = rows.filter((row) => columns.every((column) => {
+    const filterValue = filters[column.key];
+    if (!filterValue) return true;
+    return String(column.sortValue(row)).toLowerCase().includes(filterValue.trim().toLowerCase());
+  }));
   const displayedRows = activeColumn === null
-    ? rows
-    : [...rows].sort((left, right) => {
+    ? filteredRows
+    : [...filteredRows].sort((left, right) => {
         const result = compareTableValues(activeColumn.sortValue(left), activeColumn.sortValue(right));
         return sortState.direction === 'desc' ? -result : result;
       });
 
-  const sortBy = (columnKey) => {
-    setSortState((current) => ({
-      key: columnKey,
-      direction: current.key === columnKey && current.direction === 'asc' ? 'desc' : 'asc',
-    }));
-  };
+  const setColumnFilter = (columnKey, value) => setFilters((current) => ({ ...current, [columnKey]: value }));
 
   return (
     <section className="gs-fade -mx-4 max-w-[calc(100%+2rem)] overflow-hidden border-y border-[var(--border)] bg-[var(--surface)] sm:mx-0 sm:max-w-full sm:rounded sm:border">
       <div className="table-scroll max-w-full overscroll-x-contain overflow-x-auto">
-        <table className="w-full min-w-[680px] table-fixed border-collapse sm:min-w-[720px]">
+        <table className="w-full min-w-[680px] table-fixed sm:min-w-[720px]" style={{ borderCollapse: 'separate', borderSpacing: 0 }}>
           <colgroup>
             {columns.map((column) => <col key={column.key} style={{ width: column.width }} />)}
           </colgroup>
@@ -202,7 +213,7 @@ export const DataTable = ({ columns, rows, statusColumn }) => {
                       key={group.key}
                       scope="colgroup"
                       colSpan={group.columns.length}
-                      className="border-b border-r border-[var(--border)] bg-[var(--surface-2)] px-3.5 py-2.5 text-center text-[11px] font-semibold uppercase tracking-[0.08em] text-[var(--tx2)] last:border-r-0"
+                      className={`border-b border-[var(--border-2)] bg-[var(--surface-2)] px-3 py-2.5 text-center text-[11px] font-semibold uppercase tracking-[0.08em] text-[var(--tx)] ${group.columns[group.columns.length - 1].key === lastColumnKey ? '' : 'border-r'}`}
                     >
                       {group.label}
                     </th>
@@ -213,8 +224,11 @@ export const DataTable = ({ columns, rows, statusColumn }) => {
                   <SortHeader
                     key={column.key}
                     label={column.label}
-                    direction={sortState.key === column.key ? sortState.direction : null}
-                    onSort={() => sortBy(column.key)}
+                    columnKey={column.key}
+                    sortState={sortState}
+                    setSortState={setSortState}
+                    filterValue={filters[column.key] || ''}
+                    onFilterValueChange={(value) => setColumnFilter(column.key, value)}
                     rowSpan={hasGroupedHeaders ? 2 : 1}
                     isLast={column.key === lastColumnKey}
                   />
@@ -227,8 +241,11 @@ export const DataTable = ({ columns, rows, statusColumn }) => {
                   <SortHeader
                     key={column.key}
                     label={column.label}
-                    direction={sortState.key === column.key ? sortState.direction : null}
-                    onSort={() => sortBy(column.key)}
+                    columnKey={column.key}
+                    sortState={sortState}
+                    setSortState={setSortState}
+                    filterValue={filters[column.key] || ''}
+                    onFilterValueChange={(value) => setColumnFilter(column.key, value)}
                     rowSpan={1}
                     isLast={column.key === lastColumnKey}
                   />
@@ -237,10 +254,12 @@ export const DataTable = ({ columns, rows, statusColumn }) => {
             )}
           </thead>
           <tbody>
-            {displayedRows.map((row, rowIndex) => (
+            {displayedRows.length === 0 ? (
+              <tr><td colSpan={columns.length} className="px-3.5 py-7 text-center text-[13.5px] text-[var(--tx2)]">No rows match this filter.</td></tr>
+            ) : displayedRows.map((row, rowIndex) => (
               <tr
                 key={row.id}
-                className="gs-slide-in bg-[var(--surface)] transition-colors last:[&>td]:border-b-0 hover:bg-[var(--surface-2)]"
+                className="gs-slide-in bg-[var(--surface)] transition-colors [&:last-child>td]:border-b-0 hover:bg-[var(--ink-bg)]"
                 style={{ animationDelay: `${rowIndex * 0.035}s` }}
               >
                 {columns.map((column, columnIndex) => {
@@ -248,7 +267,7 @@ export const DataTable = ({ columns, rows, statusColumn }) => {
                   return (
                     <td
                       key={column.key}
-                      className={`border-b border-r border-[var(--border)] px-3.5 py-3 text-[13.5px] tabular-nums text-[var(--tx)] last:border-r-0 ${columnIndex === 0 ? 'font-semibold' : ''}`}
+                      className={`border-b border-[var(--border-2)] px-3 py-2.5 text-xs tabular-nums text-[var(--tx)] ${columnIndex === 0 ? 'font-semibold' : ''} ${columnIndex === columns.length - 1 ? '' : 'border-r'}`}
                     >
                       <div className="min-w-0 truncate">
                         {column.key === statusColumn ? <StatusBadge>{cell}</StatusBadge> : cell}

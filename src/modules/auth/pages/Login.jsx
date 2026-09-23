@@ -90,7 +90,7 @@ const Login = () => {
           </button>
         </label>
 
-        <div className="mt-0.5 flex items-center justify-between">
+        <div className="mt-0.5 flex items-center">
           <button
             type="button"
             onClick={() => setRememberMe((r) => !r)}
@@ -101,7 +101,6 @@ const Login = () => {
             </span>
             Keep me signed in
           </button>
-          <a href="#reset" className="text-[14.5px] text-[var(--pri)] hover:text-[var(--pri-d)]">Forgot password?</a>
         </div>
 
         {formError && (

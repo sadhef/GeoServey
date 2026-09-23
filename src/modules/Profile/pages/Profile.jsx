@@ -58,26 +58,48 @@ const Profile = () => {
     { title: 'Personal Information', fields: [
       { k: 'Legal Name', v: profile.legalName },
       { k: 'Date of Birth', v: formatDate(profile.birthday) },
+      { k: 'Place of Birth', v: profile.placeOfBirth },
+      { k: 'Country of Birth', v: profile.countryOfBirth },
       { k: 'Gender', v: profile.gender },
-      { k: 'Marital Status', v: profile.maritalStatus },
-    ] },
-    { title: 'Contact', fields: [
-      { k: 'Work Email', v: profile.workEmail },
-      { k: 'Mobile', v: profile.mobilePhone },
-      { k: 'Emergency Contact', v: profile.emergencyContact ? `${profile.emergencyContact} · ${profile.emergencyPhone || ''}` : null },
-      { k: 'Address', v: profile.address },
     ] },
     { title: 'Employment', fields: [
       { k: 'Employee Code', v: profile.employeeCode },
       { k: 'Employee Type', v: profile.employeeType },
       { k: 'Department', v: profile.department },
+      { k: 'Work Location', v: profile.workLocation },
       { k: 'Manager', v: profile.manager },
+      { k: 'Coach', v: profile.coach },
+    ] },
+    { title: 'Contact', fields: [
+      { k: 'Work Email', v: profile.workEmail },
+      { k: 'Work Phone', v: profile.workPhone },
+      { k: 'Personal Email', v: profile.personalEmail },
+      { k: 'Personal Phone', v: profile.personalPhone || profile.mobilePhone },
+    ] },
+    { title: 'Address', fields: [
+      { k: 'Private Address', v: profile.address },
+      { k: 'Home-Work Distance', v: profile.homeWorkDistance ? `${profile.homeWorkDistance} ${profile.homeWorkDistanceUnit || ''}`.trim() : null },
     ] },
     { title: 'Documents & IDs', fields: [
+      { k: 'Nationality', v: profile.nationality },
       { k: 'Identification No.', v: profile.identificationNo },
+      { k: 'Unified Number', v: profile.ssnNo },
       { k: 'Passport No.', v: profile.passportNo },
-      { k: 'Visa No.', v: profile.visaNo },
-      { k: 'Visa Expiry', v: formatDate(profile.visaExpirationDate) },
+      { k: 'Visa No.', v: profile.visaExpirationDate ? `${profile.visaNo} · expires ${formatDate(profile.visaExpirationDate)}` : profile.visaNo },
+      { k: 'Work Permit No.', v: profile.workPermitExpirationDate ? `${profile.workPermitNo} · expires ${formatDate(profile.workPermitExpirationDate)}` : profile.workPermitNo },
+      { k: 'Work Permit Document', v: profile.workPermitDocumentUploaded ? profile.workPermitDocumentName : null },
+    ] },
+    { title: 'Education', fields: [
+      { k: 'Certificate Level', v: profile.certificateLevel },
+      { k: 'Field of Study', v: profile.fieldOfStudy },
+      { k: 'School', v: profile.school },
+    ] },
+    { title: 'Family & Emergency', fields: [
+      { k: 'Emergency Contact', v: profile.emergencyContact ? `${profile.emergencyContact} · ${profile.emergencyPhone || ''}` : null },
+      { k: 'Marital Status', v: profile.maritalStatus },
+      { k: 'Spouse Name', v: profile.spouseLegalName },
+      { k: 'Spouse Birthday', v: formatDate(profile.spouseBirthdate) },
+      { k: 'Dependent Children', v: profile.dependentChildren || null },
     ] },
   ];
 
@@ -120,6 +142,21 @@ const Profile = () => {
               {s.fields.map((f) => <InfoRow key={f.k} label={f.k} value={f.v} />)}
             </section>
           ))}
+          <section className="gs-fade min-w-0 rounded-[14px] border border-[var(--border)] bg-[var(--surface)] p-[22px]">
+            <div className="mb-1.5 flex items-center gap-2.5">
+              <span className="block h-4 w-1 bg-[var(--pri)]" />
+              <h2 className="m-0 text-[17px] font-semibold text-[var(--tx)]">Bank Accounts</h2>
+            </div>
+            {profile.bankAccounts.length === 0 ? (
+              <p className="py-3 text-[14.5px] text-[var(--tx3)]">No bank account linked. Ask HR to add yours.</p>
+            ) : profile.bankAccounts.map((b) => (
+              <div key={b.id} className="border-b border-[var(--border)] py-3 last:border-b-0">
+                <InfoRow label="Bank" value={b.bankName} />
+                <InfoRow label="Account No." value={b.accNumberLast4 ? `•••• ${b.accNumberLast4}` : b.accNumber} />
+                <InfoRow label="Account Holder" value={b.holderName} />
+              </div>
+            ))}
+          </section>
         </div>
       </div>
     </Layout>

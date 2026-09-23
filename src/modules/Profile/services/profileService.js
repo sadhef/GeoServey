@@ -30,31 +30,51 @@ export const getProfile = async () => {
     manager: rel(e.manager),
     company: rel(e.company),
     workLocation: rel(e.work_location),
-    imageUrl: e.image_url ? `${API_ORIGIN}${e.image_url}` : null,
+    // Odoo returns image_url as an already-absolute URL; prepending API_ORIGIN again produced
+    // "https://host.comhttps://host.com/..." and a broken image.
+    imageUrl: e.image_url ? (e.image_url.startsWith('http') ? e.image_url : `${API_ORIGIN}${e.image_url}`) : null,
+
+    coach: rel(e.coach),
 
     personalEmail: contact.email,
     personalPhone: contact.phone,
-    bankAccounts: contact.bank_accounts || [],
+    bankAccounts: (contact.bank_accounts || []).map((b) => ({
+      id: b.id,
+      bankName: b.bank_name,
+      accNumber: b.acc_number,
+      accNumberLast4: b.acc_number_last4,
+      holderName: b.holder_name,
+    })),
 
     emergencyContact: emergency.contact,
     emergencyPhone: emergency.phone,
 
     nationality: rel(citizenship.nationality_country),
     identificationNo: citizenship.identification_no,
+    ssnNo: citizenship.ssn_no,
     passportNo: citizenship.passport_no,
 
     maritalStatus: rel(family.marital_status),
+    spouseLegalName: family.spouse_legal_name,
+    spouseBirthdate: family.spouse_birthdate,
+    dependentChildren: family.dependent_children,
 
     legalName: personal.legal_name,
     birthday: personal.birthday,
+    placeOfBirth: personal.place_of_birth,
+    countryOfBirth: rel(personal.country_of_birth),
     gender: rel(personal.gender),
 
     visaNo: visa.visa_no,
     visaExpirationDate: visa.visa_expiration_date,
     workPermitNo: visa.work_permit_no,
     workPermitExpirationDate: visa.work_permit_expiration_date,
+    workPermitDocumentUploaded: visa.work_permit_document_uploaded,
+    workPermitDocumentName: visa.work_permit_document_name,
 
-    address: [address.street, address.city, rel(address.country)].filter(Boolean).join(', '),
+    address: [address.street, address.street2, address.city, rel(address.country)].filter(Boolean).join(', '),
+    homeWorkDistance: location.home_work_distance,
+    homeWorkDistanceUnit: rel(location.home_work_distance_unit),
 
     certificateLevel: rel(education.certificate_level),
     fieldOfStudy: education.field_of_study,

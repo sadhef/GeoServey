@@ -7,9 +7,7 @@ import Profile from './modules/Profile/pages/Profile.jsx';
 import Attendance from './modules/Attendance/pages/Attendance.jsx';
 import Leave from './modules/Leave/pages/Leave.jsx';
 import Payslips from './modules/Payslips/pages/Payslips.jsx';
-import Documents from './modules/Documents/pages/Documents.jsx';
 import Announcements from './modules/Announcements/pages/Announcements.jsx';
-import Directory from './modules/Directory/pages/Directory.jsx';
 
 /** Full-page spinner shown while auth state (user/session) is being resolved, used by every route guard below. */
 const LoadingScreen = () => (
@@ -61,9 +59,7 @@ const AppRoutes = () => {
         <Route path="/leave" element={<ProtectedRoute><Leave /></ProtectedRoute>} />
         <Route path="/requests" element={<Navigate to="/leave" replace />} />
         <Route path="/payslips" element={<ProtectedRoute><Payslips /></ProtectedRoute>} />
-        <Route path="/documents" element={<ProtectedRoute><Documents /></ProtectedRoute>} />
         <Route path="/announcements" element={<ProtectedRoute><Announcements /></ProtectedRoute>} />
-        <Route path="/directory" element={<ProtectedRoute><Directory /></ProtectedRoute>} />
         <Route path="*" element={user ? <Navigate to="/" replace /> : <Navigate to="/login" replace />} />
       </Routes>
     </>

@@ -7,6 +7,7 @@ const TONE_BY_STATUS = {
   Rejected: 'bg-[var(--bad-bg)] text-[var(--bad)]',
   Absent: 'bg-[var(--bad-bg)] text-[var(--bad)]',
   'In Progress': 'bg-[var(--pri-bg)] text-[var(--pri-d)]',
+  'Missed Checkout': 'bg-[var(--bad-bg)] text-[var(--bad)]',
   Remote: 'bg-[var(--pri-bg)] text-[var(--pri-d)]',
   IT: 'bg-[var(--pri-bg)] text-[var(--pri-d)]',
   Company: 'bg-[var(--ink-bg)] text-[var(--ink)]',

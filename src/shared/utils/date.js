@@ -27,8 +27,17 @@ export const formatTime = (date) => {
   return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
 };
 
-/** Formats a Date as the "YYYY-MM-DD" the backend expects for query params and leave requests. */
-export const toApiDate = (date) => date.toISOString().slice(0, 10);
+/**
+ * Formats a local calendar date for backend query params and leave requests.
+ * @param {Date} date - Local date to format.
+ * @returns {string} Date in YYYY-MM-DD format.
+ */
+export const toApiDate = (date) => {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
 
 /** Start-of-month, end-of-month, and start-of-year helpers used to build the Attendance page's date-range tabs. */
 export const startOfMonth = (date) => new Date(date.getFullYear(), date.getMonth(), 1);

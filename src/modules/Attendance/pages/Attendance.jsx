@@ -44,8 +44,15 @@ const COLUMNS = [
   { key: 'date', label: 'Date', group: null, width: '22%', render: (row) => formatDate(row.checkIn), sortValue: (row) => row.checkIn.getTime() },
   { key: 'checkIn', label: 'Check In', group: null, width: '22%', render: (row) => <PunchCell time={formatTime(row.checkIn)} coords={row.checkInCoords} />, sortValue: (row) => row.checkIn.getTime() },
   { key: 'checkOut', label: 'Check Out', group: null, width: '22%', render: (row) => <PunchCell time={formatTime(row.checkOut)} coords={row.checkOutCoords} />, sortValue: (row) => (row.checkOut === null ? 0 : row.checkOut.getTime()) },
-  { key: 'worked', label: 'Worked', group: null, width: '15%', render: (row) => (row.workedHours === null ? '-' : `${row.workedHours.toFixed(1)}h`), sortValue: (row) => (row.workedHours === null ? 0 : row.workedHours) },
-  { key: 'status', label: 'Status', group: null, width: '19%', render: (row) => (row.checkOut ? 'Present' : 'In Progress'), sortValue: (row) => (row.checkOut ? 'Present' : 'In Progress') },
+  { key: 'worked', label: 'Worked', group: null, width: '15%', render: (row) => (!row.checkOut || row.workedHours === null ? '-' : `${row.workedHours.toFixed(1)}h`), sortValue: (row) => (row.workedHours === null ? 0 : row.workedHours) },
+  {
+    key: 'status',
+    label: 'Status',
+    group: null,
+    width: '19%',
+    render: (row) => (row.checkOut ? 'Present' : row.checkIn.toDateString() === new Date().toDateString() ? 'In Progress' : 'Missed Checkout'),
+    sortValue: (row) => (row.checkOut ? 2 : row.checkIn.toDateString() === new Date().toDateString() ? 1 : 0),
+  },
 ];
 
 const Attendance = () => {
@@ -61,6 +68,7 @@ const Attendance = () => {
   const todayQuery = useQuery({
     queryKey: ['attendance', 'today'],
     queryFn: () => listAttendance(todayRange()),
+    refetchInterval: 60_000,
   });
 
   const punchMutation = useMutation({
@@ -75,21 +83,47 @@ const Attendance = () => {
     onError: (error) => toast.error(error.message),
   });
 
-  const todayRecord = todayQuery.data?.[0];
-  const isCheckedIn = !!todayRecord && !todayRecord.checkOut;
+  const latestRecord = todayQuery.data?.[0];
+  const activeRecord = todayQuery.data?.find((record) => !record.checkOut);
+  const isCheckedIn = !!activeRecord;
+  const action = isCheckedIn ? 'out' : 'in';
+  const actionDisabled = todayQuery.isFetching || todayQuery.isError || punchMutation.isPending;
+  let actionLabel = isCheckedIn ? 'Check Out' : 'Check In';
+  if (todayQuery.isLoading) actionLabel = 'Loading Attendance…';
+  if (todayQuery.isError) actionLabel = 'Attendance Unavailable';
+  if (punchMutation.isPending) actionLabel = isCheckedIn ? 'Checking Out…' : 'Checking In…';
+
+  let currentStatus = 'Not Checked In';
+  let currentStatusNote = 'No punches today';
+  if (latestRecord) {
+    currentStatus = 'Checked Out';
+    currentStatusNote = `At ${formatTime(latestRecord.checkOut)}`;
+  }
+  if (activeRecord) {
+    currentStatus = 'Checked In';
+    currentStatusNote = `Since ${formatTime(activeRecord.checkIn)}`;
+  }
+  if (todayQuery.isError) {
+    currentStatus = 'Unavailable';
+    currentStatusNote = 'Could not load attendance';
+  }
 
   const metrics = useMemo(() => {
     const records = recordsQuery.data || [];
-    const withHours = records.filter((r) => r.workedHours != null);
+    const withHours = records.filter((r) => r.checkOut && r.workedHours != null);
     const totalHours = withHours.reduce((sum, r) => sum + r.workedHours, 0);
     const avgHours = withHours.length ? totalHours / withHours.length : 0;
     return [
       { label: 'Days Recorded', value: String(records.length).padStart(2, '0'), note: `In ${tab.toLowerCase()}` },
       { label: 'Total Hours', value: `${totalHours.toFixed(1)}h`, note: `Across ${withHours.length} completed days` },
       { label: 'Avg. Hours / Day', value: `${avgHours.toFixed(1)}h`, note: 'On completed days' },
-      { label: 'Today', value: isCheckedIn ? 'Checked In' : 'Checked Out', note: todayRecord ? formatTime(todayRecord.checkIn) : 'No punch yet' },
+      {
+        label: 'Current Status',
+        value: currentStatus,
+        note: currentStatusNote,
+      },
     ];
-  }, [recordsQuery.data, tab, isCheckedIn, todayRecord]);
+  }, [recordsQuery.data, tab, currentStatus, currentStatusNote]);
 
   const rows = recordsQuery.data || [];
 
@@ -99,8 +133,9 @@ const Attendance = () => {
         <PageHeader
           title="Attendance"
           subtitle={`Check-ins, timesheets and worked hours for ${new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}`}
-          actionLabel={isCheckedIn ? 'Check Out' : 'Check In'}
-          onAction={() => punchMutation.mutate(isCheckedIn ? 'out' : 'in')}
+          actionLabel={actionLabel}
+          actionDisabled={actionDisabled}
+          onAction={() => punchMutation.mutate(action)}
         />
         <TabBar tabs={TABS} active={tab} onChange={setTab} />
 
