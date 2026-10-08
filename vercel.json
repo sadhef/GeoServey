@@ -3,7 +3,7 @@
   "framework": "vite",
   "rewrites": [
     {
-      "source": "/hrms/:dir(assets|brand)/:file*",
+      "source": "/hrms/geoservey/:dir(assets|brand)/:file*",
       "destination": "/:dir/:file*"
     },
     {

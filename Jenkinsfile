@@ -8,7 +8,7 @@ pipeline {
     }
 
     environment {
-        APP_NAME = 'hrms-frontend'
+        APP_NAME = 'geosurvey-frontend'
         NAMESPACE = 'prod'
         VITE_API_URL = 'https://biztras-test.odoo.com'
         BUILDKIT_HOST = 'unix:///run/buildkit/buildkitd.sock'
@@ -121,7 +121,7 @@ pipeline {
 
     post {
         success {
-            echo 'Deployed HRMS: https://syncme.biztras.com/hrms/'
+            echo 'Deployed Geo Survey: https://syncme.biztras.com/hrms/geoservey/'
         }
     }
 }

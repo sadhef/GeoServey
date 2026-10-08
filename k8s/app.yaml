@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: hrms-frontend
+  name: geosurvey-frontend
   namespace: prod
 spec:
   replicas: 1
@@ -9,17 +9,17 @@ spec:
   progressDeadlineSeconds: 180
   selector:
     matchLabels:
-      app: hrms-frontend
+      app: geosurvey-frontend
   template:
     metadata:
       labels:
-        app: hrms-frontend
+        app: geosurvey-frontend
     spec:
       automountServiceAccountToken: false
       nodeSelector:
         kubernetes.io/hostname: ${KUBE_NODE_HOSTNAME}
       containers:
-        - name: hrms-frontend
+        - name: geosurvey-frontend
           image: ${IMAGE}
           imagePullPolicy: Never
           ports:
@@ -27,7 +27,7 @@ spec:
               containerPort: 80
           readinessProbe:
             httpGet:
-              path: /hrms/index.html
+              path: /hrms/geoservey/index.html
               port: http
             initialDelaySeconds: 5
             periodSeconds: 5
@@ -48,11 +48,11 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: hrms-frontend-svc
+  name: geosurvey-frontend-svc
   namespace: prod
 spec:
   selector:
-    app: hrms-frontend
+    app: geosurvey-frontend
   ports:
     - name: http
       port: 80
@@ -61,7 +61,7 @@ spec:
 apiVersion: networking.istio.io/v1
 kind: VirtualService
 metadata:
-  name: hrms-frontend-vs
+  name: geosurvey-frontend-vs
   namespace: prod
 spec:
   hosts:
@@ -71,28 +71,14 @@ spec:
   http:
     - match:
         - uri:
-            exact: /
-        - uri:
-            exact: /hrms
+            exact: /hrms/geoservey
       redirect:
-        uri: /hrms/
+        uri: /hrms/geoservey/
     - match:
         - uri:
-            prefix: /hrms/
+            prefix: /hrms/geoservey/
       route:
         - destination:
-            host: hrms-frontend-svc.prod.svc.cluster.local
+            host: geosurvey-frontend-svc.prod.svc.cluster.local
             port:
               number: 80
----
-apiVersion: networking.istio.io/v1
-kind: DestinationRule
-metadata:
-  name: hrms-frontend-dr
-  namespace: prod
-spec:
-  host: hrms-frontend-svc.prod.svc.cluster.local
-  trafficPolicy:
-    loadBalancer:
-      consistentHash:
-        useSourceIp: true
