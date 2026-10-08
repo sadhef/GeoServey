@@ -3,6 +3,10 @@
   "framework": "vite",
   "rewrites": [
     {
+      "source": "/geosurvey/:dir(assets|brand)/:file*",
+      "destination": "/:dir/:file*"
+    },
+    {
       "source": "/(.*)",
       "destination": "/index.html"
     }
