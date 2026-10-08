@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import Layout from '../../../shared/components/Layout.jsx';
+import { ErrorState } from '../../../shared/components/hr/HrPage.jsx';
 import StatusBadge from '../../../shared/components/hr/StatusBadge.jsx';
 import Icon from '../../../shared/components/Icon.jsx';
 import { useAuth } from '../../../shared/context/AuthContext.jsx';
@@ -15,13 +16,6 @@ const SERVICES = [
   { to: '/profile', label: 'My Profile', desc: 'Visa, passport and HR record', icon: 'user' },
   { to: '/attendance', label: 'Attendance', desc: 'Site check-ins and hours', icon: 'siteCheckIn' },
   { to: '/leave', label: 'Leave Requests', desc: 'Apply for leave or check balance', icon: 'calendar' },
-  { to: '/payslips', label: 'Payroll', desc: 'View your salary slips', icon: 'receipt' },
-];
-
-const ANNOUNCEMENTS = [
-  { tag: 'BIM', title: 'Zayed National Museum LOD 500 handover', body: 'Landscape and site model signed off by the consultant.', date: '18 Aug 2026' },
-  { tag: 'KIT', title: 'Leica RTC360 scanners issued to survey crews', body: 'Collect from the Mussafah stores with your asset form.', date: '17 Aug 2026' },
-  { tag: 'HSE', title: 'Mandatory HSE refresher', body: 'All field staff must complete it before 15 September.', date: '15 Aug 2026' },
 ];
 
 const LEAVE_BAR_COLORS = ['#26308C', '#29ABE2', '#3D49B5', '#6ABCE4', '#1E7FB4'];
@@ -93,10 +87,10 @@ const Dashboard = () => {
   // `live` marks the one tile whose icon reports state rather than just labelling the tile: while the
   // user is checked in at a site, the map pin is the only accent-bearing glyph on the screen.
   const statCards = [
-    { icon: 'siteCheckIn', title: 'Attendance', value: activeRecord ? formatTime(activeRecord.checkIn) : latestRecord ? formatTime(latestRecord.checkOut) : '-', foot: activeRecord ? 'In progress' : latestRecord ? 'Checked out' : 'No punches today', live: !!activeRecord },
-    { icon: 'calendar', title: 'Leave Balance', value: balancesQuery.data ? String(balancesQuery.data.totalRemaining) : '-', foot: 'Days available' },
-    { icon: 'pending', title: 'Pending', value: String(pendingCount).padStart(2, '0'), foot: 'Requests awaiting approval' },
-    { icon: 'chart', title: 'Hours This Week', value: totalWeekLabel, foot: `Across ${weekBars.length} working days` },
+    { icon: 'siteCheckIn', title: 'Attendance', query: todayQuery, value: activeRecord ? formatTime(activeRecord.checkIn) : latestRecord ? formatTime(latestRecord.checkOut) : '-', foot: activeRecord ? 'In progress' : latestRecord ? 'Checked out' : 'No punches today', live: !!activeRecord },
+    { icon: 'calendar', title: 'Leave Balance', query: balancesQuery, value: balancesQuery.data ? String(balancesQuery.data.totalRemaining) : '-', foot: 'Days available' },
+    { icon: 'pending', title: 'Pending', query: listQuery, value: String(pendingCount).padStart(2, '0'), foot: 'Requests awaiting approval' },
+    { icon: 'chart', title: 'Hours This Week', query: weekQuery, value: totalWeekLabel, foot: `Across ${weekBars.length} working days` },
   ];
 
   return (
@@ -121,7 +115,7 @@ const Dashboard = () => {
                 <div className="mt-2 h-3 w-28 rounded bg-[var(--surface-2)]" />
               </div>
             ))
-          ) : statCards.map(({ icon, title, value, foot, live }, i) => (
+          ) : statCards.map(({ icon, title, query, value, foot, live }, i) => (
             <div
               key={title}
               className="gs-fade relative overflow-hidden rounded-[14px] border border-[var(--border)] bg-[var(--surface)] p-5 transition-[background-color,border-color] duration-200 hover:border-[var(--border-2)] hover:bg-[var(--surface-2)]"
@@ -133,16 +127,21 @@ const Dashboard = () => {
                   <Icon name={icon} size={20} color={live ? 'var(--pri-d)' : 'var(--ink)'} />
                 </div>
               </div>
-              <div className="mt-3 text-[30px] font-bold tabular-nums tracking-[-0.03em] text-[var(--ink)]">{value}</div>
-              <div className="mt-[3px] text-[13.5px] text-[var(--tx2)]">{foot}</div>
+              <div className="mt-3 break-words text-[30px] font-bold tabular-nums tracking-[-0.03em] text-[var(--ink)]">{query.isError ? 'Unavailable' : value}</div>
+              {query.isError ? (
+                <div role="alert" className="mt-[3px] text-[13.5px] text-[var(--tx2)]">
+                  <p className="m-0 break-words">{query.error.message}</p>
+                  <button type="button" disabled={query.isFetching} onClick={() => query.refetch()} className="mt-2 cursor-pointer border-0 bg-transparent p-0 text-[var(--pri)] underline focus-visible:outline-2 focus-visible:outline-[var(--pri)] disabled:cursor-not-allowed">Retry</button>
+                </div>
+              ) : <div className="mt-[3px] text-[13.5px] text-[var(--tx2)]">{foot}</div>}
             </div>
           ))}
         </div>
 
-        <div className="grid grid-cols-1 items-start gap-[18px] xl:grid-cols-[1.7fr_1fr]">
+        <div>
           <section className="gs-fade rounded-[14px] border border-[var(--border)] bg-[var(--surface)] p-6" style={{ animationDelay: '0.1s' }}>
             <h2 className="m-0 mb-5 text-[17px] font-semibold tracking-[-0.01em] text-[var(--tx)]">Quick Access</h2>
-            <div className="grid grid-cols-1 gap-3.5 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="grid grid-cols-1 gap-3.5 sm:grid-cols-2 lg:grid-cols-3">
               {SERVICES.map(({ to, label, desc, icon }, i) => (
                 <button
                   key={to}
@@ -161,29 +160,6 @@ const Dashboard = () => {
             </div>
           </section>
 
-          <section className="gs-fade rounded-[14px] border border-[var(--border)] bg-[var(--surface)] p-6" style={{ animationDelay: '0.16s' }}>
-            <div className="mb-4 flex items-center justify-between">
-              <h2 className="m-0 text-[17px] font-semibold text-[var(--tx)]">Announcements</h2>
-              <button type="button" onClick={() => navigate('/announcements')} className="cursor-pointer border-0 bg-transparent text-sm font-medium text-[var(--pri)] hover:text-[var(--pri-d)]">View all</button>
-            </div>
-            <div className="flex flex-col gap-3.5">
-              {ANNOUNCEMENTS.map((a) => (
-                <div key={a.title} className="-m-2.5 flex cursor-pointer gap-3.5 rounded-[10px] p-2.5 transition-colors duration-200 hover:bg-[var(--surface-2)]">
-                  <div
-                    className="grid h-14 w-14 flex-shrink-0 place-items-center rounded-[12px] text-[12px] font-extrabold tracking-[0.04em] text-white"
-                    style={{ backgroundImage: 'var(--brand-sweep)' }}
-                  >
-                    {a.tag}
-                  </div>
-                  <div className="min-w-0">
-                    <div className="text-[14.5px] font-medium text-[var(--tx)]">{a.title}</div>
-                    <div className="mt-[3px] text-[13px] leading-[1.45] text-[var(--tx2)]">{a.body}</div>
-                    <div className="mt-[5px] text-[12px] text-[var(--tx3)]">{a.date}</div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </section>
         </div>
 
         <div className="grid grid-cols-1 items-start gap-[18px] xl:grid-cols-3">
@@ -204,6 +180,8 @@ const Dashboard = () => {
                   ))}
                 </div>
               </div>
+            ) : balancesQuery.isError ? (
+              <ErrorState message={balancesQuery.error.message} onRetry={() => balancesQuery.refetch()} />
             ) : balancesQuery.data?.balances.length ? (
               <>
                 <div className="flex items-baseline gap-2.5">
@@ -262,6 +240,8 @@ const Dashboard = () => {
                   </div>
                 ))}
               </div>
+            ) : listQuery.isError ? (
+              <ErrorState message={listQuery.error.message} onRetry={() => listQuery.refetch()} />
             ) : recentRequests.length ? recentRequests.map((r) => (
               <div key={r.id} className="-mx-2 flex items-center gap-3 rounded-[9px] px-2 py-3 transition-colors duration-200 hover:bg-[var(--surface-2)]">
                 <div className="grid h-8 w-8 flex-shrink-0 place-items-center rounded-lg bg-[var(--ink-bg)]">
@@ -290,6 +270,8 @@ const Dashboard = () => {
                   </div>
                 ))}
               </div>
+            ) : weekQuery.isError ? (
+              <ErrorState message={weekQuery.error.message} onRetry={() => weekQuery.refetch()} />
             ) : weekBars.length ? (
               <>
                 <div className="flex h-[132px] items-end justify-between gap-2.5">

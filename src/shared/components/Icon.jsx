@@ -10,8 +10,6 @@ import {
   FileText,
   IdentificationBadge,
   MapPinLine,
-  Megaphone,
-  Receipt,
   ShieldCheck,
   SignOut,
   SquaresFour,
@@ -26,7 +24,7 @@ import {
  * Two roles deliberately read geospatial rather than generic, because that is what the underlying
  * action actually is at a survey company: attendance is a geofenced check-in at a named site, not a
  * timesheet, so it carries a map pin; and an employee's identity in the field is the site ID badge.
- * Everything else stays conventional, because a survey metaphor on a payslip or a leave request
+ * Everything else stays conventional, because a survey metaphor on a leave request
  * would only make a standard task harder to recognise.
  */
 const ICONS = {
@@ -35,9 +33,7 @@ const ICONS = {
   siteCheckIn: MapPinLine,
   calendar: CalendarBlank,
   pending: ClockCountdown,
-  receipt: Receipt,
   file: FileText,
-  megaphone: Megaphone,
   users: UsersThree,
   chart: ChartLineUp,
   award: Certificate,

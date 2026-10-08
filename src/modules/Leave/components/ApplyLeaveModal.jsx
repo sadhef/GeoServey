@@ -50,7 +50,11 @@ const ApplyLeaveModal = ({ open, onClose }) => {
       toast.error('Leave type, from date and to date are required.');
       return;
     }
-    applyMutation.mutate();
+    if (form.from > form.to) {
+      toast.error('The end date must be on or after the start date.');
+      return;
+    }
+    if (!applyMutation.isPending) applyMutation.mutate();
   };
 
   return createPortal(
@@ -97,7 +101,7 @@ const ApplyLeaveModal = ({ open, onClose }) => {
             </label>
             <label className={labelClass}>
               To
-              <DatePicker value={form.to} onChange={setDateField('to')} />
+              <DatePicker value={form.to} minDate={form.from} onChange={setDateField('to')} />
             </label>
           </div>
           <label className={labelClass}>

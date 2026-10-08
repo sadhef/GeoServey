@@ -29,8 +29,12 @@ const isSameDay = (a, b) => !!a && !!b && a.getFullYear() === b.getFullYear() &&
  * @param {string} value - Selected date as `YYYY-MM-DD`, or empty.
  * @param {(value: string) => void} onChange - Called with the newly selected `YYYY-MM-DD`.
  * @param {string} [placeholder] - Shown in the trigger when no date is selected.
+ * @param {string} [minDate] - Earliest selectable `YYYY-MM-DD` date.
+ * @param {string} [maxDate] - Latest selectable `YYYY-MM-DD` date.
+ * @param {import('react').RefObject<HTMLDialogElement>} [portalRef] - Open native dialog that owns the calendar, when used inside one.
+ * @returns {import('react').ReactElement} Calendar trigger and popover.
  */
-const DatePicker = ({ value, onChange, placeholder = 'Select date' }) => {
+const DatePicker = ({ value, onChange, placeholder = 'Select date', minDate, maxDate, portalRef }) => {
   const selected = parseIsoDate(value);
   const [open, setOpen] = useState(false);
   const [viewMonth, setViewMonth] = useState(() => selected || new Date());
@@ -40,7 +44,9 @@ const DatePicker = ({ value, onChange, placeholder = 'Select date' }) => {
 
   const reposition = () => {
     const rect = triggerRef.current?.getBoundingClientRect();
-    if (rect) setCoords({ top: rect.bottom + 6, left: rect.left, width: rect.width });
+    // The app root is CSS-zoomed on desktop: rects are in screen pixels but `fixed` offsets get scaled again.
+    const zoom = parseFloat(getComputedStyle(document.documentElement).zoom) || 1;
+    if (rect) setCoords({ top: (rect.bottom + 6) / zoom, left: rect.left / zoom, width: rect.width / zoom });
   };
 
   useEffect(() => {
@@ -78,7 +84,9 @@ const DatePicker = ({ value, onChange, placeholder = 'Select date' }) => {
 
   const pick = (day) => {
     const date = new Date(viewMonth.getFullYear(), viewMonth.getMonth(), day);
-    onChange(toIsoDate(date));
+    const isoDate = toIsoDate(date);
+    if ((minDate && isoDate < minDate) || (maxDate && isoDate > maxDate)) return;
+    onChange(isoDate);
     setOpen(false);
   };
 
@@ -129,20 +137,26 @@ const DatePicker = ({ value, onChange, placeholder = 'Select date' }) => {
             {cells.map((day, i) => {
               if (day === null) return <span key={`b${i}`} />;
               const date = new Date(viewMonth.getFullYear(), viewMonth.getMonth(), day);
+              const isoDate = toIsoDate(date);
+              const disabled = (minDate && isoDate < minDate) || (maxDate && isoDate > maxDate);
               const isSelected = isSameDay(date, selected);
               const isToday = isSameDay(date, today);
               return (
                 <button
                   key={day}
                   type="button"
+                  aria-label={formatDate(date)}
                   onClick={() => pick(day)}
+                  disabled={disabled}
                   className={[
-                    'mx-auto flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg text-[13.5px] tabular-nums transition-colors duration-150',
-                    isSelected
-                      ? 'bg-[var(--pri)] font-semibold text-white'
-                      : isToday
-                        ? 'border border-[var(--ink-2)] text-[var(--ink-2)]'
-                        : 'text-[var(--tx)] hover:bg-[var(--bg)]',
+                    'mx-auto flex h-8 w-8 items-center justify-center rounded-lg text-[13.5px] tabular-nums transition-colors duration-150',
+                    disabled
+                      ? 'cursor-not-allowed text-[var(--tx3)] opacity-50'
+                      : isSelected
+                        ? 'cursor-pointer bg-[var(--pri)] font-semibold text-white'
+                        : isToday
+                          ? 'cursor-pointer border border-[var(--ink-2)] text-[var(--ink-2)]'
+                          : 'cursor-pointer text-[var(--tx)] hover:bg-[var(--bg)]',
                   ].join(' ')}
                 >
                   {day}
@@ -151,7 +165,7 @@ const DatePicker = ({ value, onChange, placeholder = 'Select date' }) => {
             })}
           </div>
         </div>,
-        document.body
+        portalRef?.current ?? document.body
       )}
     </>
   );

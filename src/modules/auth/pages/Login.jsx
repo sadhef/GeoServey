@@ -53,7 +53,7 @@ const Login = () => {
 
   return (
     <AuthLayout>
-      <img src="/brand/geosurvey-mark.png" alt="" aria-hidden="true" className="mb-[26px] block w-11" />
+      <img src={`${import.meta.env.BASE_URL}brand/geosurvey-mark.png`} alt="" aria-hidden="true" className="mb-[26px] block w-11" />
 
       <h1 className="m-0 text-[28px] font-extrabold tracking-[-0.025em] text-[var(--tx)] sm:text-[32px]">Sign in</h1>
       <p className="m-0 mb-[30px] mt-2 text-[15.5px] text-[var(--tx2)]">Use your Geo Survey Tech corporate account.</p>

@@ -29,15 +29,29 @@ export const getTypes = async () => {
   return data.map((t) => ({ id: t.id, name: t.name }));
 };
 
-/** Submits a leave request; the backend requires the attachment keys present even with no file attached. */
-export const applyLeave = async ({ leaveTypeId, dateFrom, dateTo, description }) =>
-  axios.post('/leave/apply', {
+/**
+ * Submits a leave request with the required empty attachment fields.
+ * @param {{leaveTypeId: number, dateFrom: string, dateTo: string, description: string}} request - Leave type, inclusive YYYY-MM-DD dates and reason.
+ * @returns {Promise<object>} The created leave request.
+ * @throws {Error} When the type, dates or reason are invalid, or the API rejects the request.
+ */
+export const applyLeave = async ({ leaveTypeId, dateFrom, dateTo, description }) => {
+  if (!Number.isSafeInteger(leaveTypeId) || leaveTypeId <= 0) throw new Error('Choose a valid leave type.');
+  for (const date of [dateFrom, dateTo]) {
+    if (typeof date !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(date) || !Number.isFinite(Date.parse(date)) || new Date(date).toISOString().slice(0, 10) !== date) {
+      throw new Error('Choose valid leave dates.');
+    }
+  }
+  if (dateFrom > dateTo) throw new Error('The end date must be on or after the start date.');
+  if (typeof description !== 'string') throw new Error('Enter a valid leave reason.');
+  return axios.post('/leave/apply', {
     leave_type_id: leaveTypeId,
     date_from: dateFrom,
     date_to: dateTo,
-    description: description || '',
+    description: description.trim(),
     attachment: { filename: '', content: '' },
   });
+};
 
 /** Fetches every leave request raised by this employee - also the data source for the Requests page. */
 export const getLeaveList = async () => {

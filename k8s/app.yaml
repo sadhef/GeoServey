@@ -1,0 +1,84 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: geosurvey-frontend
+  namespace: prod
+spec:
+  replicas: 1
+  revisionHistoryLimit: 3
+  progressDeadlineSeconds: 180
+  selector:
+    matchLabels:
+      app: geosurvey-frontend
+  template:
+    metadata:
+      labels:
+        app: geosurvey-frontend
+    spec:
+      automountServiceAccountToken: false
+      nodeSelector:
+        kubernetes.io/hostname: ${KUBE_NODE_HOSTNAME}
+      containers:
+        - name: geosurvey-frontend
+          image: ${IMAGE}
+          imagePullPolicy: Never
+          ports:
+            - name: http
+              containerPort: 80
+          readinessProbe:
+            httpGet:
+              path: /geosurvey/index.html
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              cpu: 500m
+              memory: 128Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: geosurvey-frontend-svc
+  namespace: prod
+spec:
+  selector:
+    app: geosurvey-frontend
+  ports:
+    - name: http
+      port: 80
+      targetPort: http
+---
+apiVersion: networking.istio.io/v1
+kind: VirtualService
+metadata:
+  name: geosurvey-frontend-vs
+  namespace: prod
+spec:
+  hosts:
+    - syncme.biztras.com
+  gateways:
+    - jenkins/jenkins-gateway
+  http:
+    - match:
+        - uri:
+            exact: /geosurvey
+      redirect:
+        uri: /geosurvey/
+    - match:
+        - uri:
+            prefix: /geosurvey/
+      route:
+        - destination:
+            host: geosurvey-frontend-svc.prod.svc.cluster.local
+            port:
+              number: 80

@@ -42,8 +42,8 @@ const Layout = ({ children }) => {
               <a href="#status" className="text-[var(--tx2)] hover:text-[var(--pri)]">System Status</a>
             </span>
           </div>
-          <img src="/brand/geosurvey-logo.png" alt="" className="hidden h-[18px] opacity-55 lg:block dark:lg:hidden" />
-          <img src="/brand/geosurvey-logo-white.png" alt="" className="hidden h-[18px] opacity-55 dark:lg:block" />
+          <img src={`${import.meta.env.BASE_URL}brand/geosurvey-logo.png`} alt="" className="hidden h-[18px] opacity-55 lg:block dark:lg:hidden" />
+          <img src={`${import.meta.env.BASE_URL}brand/geosurvey-logo-white.png`} alt="" className="hidden h-[18px] opacity-55 dark:lg:block" />
         </footer>
       </div>
     </div>

@@ -6,8 +6,6 @@ import Dashboard from './modules/Dashboard/pages/Dashboard.jsx';
 import Profile from './modules/Profile/pages/Profile.jsx';
 import Attendance from './modules/Attendance/pages/Attendance.jsx';
 import Leave from './modules/Leave/pages/Leave.jsx';
-import Payslips from './modules/Payslips/pages/Payslips.jsx';
-import Announcements from './modules/Announcements/pages/Announcements.jsx';
 
 /** Full-page spinner shown while auth state (user/session) is being resolved, used by every route guard below. */
 const LoadingScreen = () => (
@@ -58,8 +56,6 @@ const AppRoutes = () => {
         <Route path="/attendance" element={<ProtectedRoute><Attendance /></ProtectedRoute>} />
         <Route path="/leave" element={<ProtectedRoute><Leave /></ProtectedRoute>} />
         <Route path="/requests" element={<Navigate to="/leave" replace />} />
-        <Route path="/payslips" element={<ProtectedRoute><Payslips /></ProtectedRoute>} />
-        <Route path="/announcements" element={<ProtectedRoute><Announcements /></ProtectedRoute>} />
         <Route path="*" element={user ? <Navigate to="/" replace /> : <Navigate to="/login" replace />} />
       </Routes>
     </>
@@ -69,7 +65,7 @@ const AppRoutes = () => {
 /** Root component: wraps the routed app in the browser router. */
 const App = () => {
   return (
-    <BrowserRouter>
+    <BrowserRouter basename={import.meta.env.BASE_URL}>
       <AppRoutes />
     </BrowserRouter>
   );

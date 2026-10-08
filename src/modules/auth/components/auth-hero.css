@@ -1,0 +1,91 @@
+.geo-auth {
+  display: grid;
+  grid-template-columns: 1.05fr 1fr;
+  height: 100%;
+  gap: 22px;
+  padding: 24px;
+  overflow-y: auto;
+  background: var(--surface);
+}
+
+.geo-hero {
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 720px;
+  padding: 38px 44px 24px;
+  overflow: hidden;
+  border: 1px solid #dbe9ee;
+  border-radius: 24px;
+  color: #1b2854;
+  background: radial-gradient(ellipse at 80% 12%, #ffffff 0%, transparent 56%),
+    linear-gradient(155deg, #edf3f9, #e8f4f6 58%, #d8edf2);
+}
+
+.geo-hero::before {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  pointer-events: none;
+  background-image: radial-gradient(#507e9b30 .8px, transparent .8px);
+  background-size: 22px 22px;
+  mask-image: linear-gradient(transparent 8%, black 35%, transparent 78%);
+}
+
+.geo-hero__header { display: flex; align-items: center; justify-content: space-between; gap: 24px; }
+.geo-hero__logo { display: block; width: 194px; height: auto; }
+.geo-hero__edition { color: #4b657a; font-size: 9px; letter-spacing: .18em; line-height: 1.8; text-align: right; }
+.geo-hero__art { display: flex; flex: 1; align-items: center; justify-content: center; margin: 24px -16px 12px; }
+.geo-hero__survey { display: block; width: min(100%, 540px); overflow: visible; }
+.geo-hero__foundation { fill: #bddae7; fill-opacity: .35; stroke: #9bbfd0; stroke-opacity: .35; }
+.geo-hero__substrate { fill: #d3e8f1; fill-opacity: .7; stroke: #97bfce; stroke-opacity: .45; }
+.geo-hero__surface { fill: url(#geo-terrain-surface); stroke: #8fbacc; stroke-width: 1.2; }
+.geo-hero__mesh { stroke: #87b2c6; stroke-opacity: .23; stroke-width: .8; }
+.geo-hero__contours { stroke: url(#geo-terrain-line); stroke-width: 1.5; }
+.geo-hero__scan { stroke: #127fba; stroke-width: 2; stroke-linecap: round; stroke-dasharray: .18 .82; }
+.geo-hero__points { fill: #248aba; stroke: #effaff; stroke-width: 2; }
+.geo-hero__projection { stroke: #4c98b9; stroke-width: 1; stroke-dasharray: 3 5; }
+.geo-hero__shadow { fill: #376e97; opacity: .12; }
+.geo-hero__mark { filter: drop-shadow(0 12px 12px #26308c18); }
+.geo-hero__copy { max-width: 510px; }
+.geo-hero__copy h2 { margin: 0; font-size: clamp(30px, 3vw, 46px); font-weight: 700; letter-spacing: -.045em; line-height: 1.17; text-wrap: pretty; }
+.geo-hero__copy h2 span { color: #167ba6; }
+.geo-hero__description { max-width: 380px; margin: 20px 0 26px; color: #4b657a; font-size: 15px; line-height: 1.7; text-wrap: pretty; }
+.geo-auth__form { display: flex; align-items: center; justify-content: center; min-width: 0; padding: 52px 28px; }
+
+@media (prefers-reduced-motion: no-preference) {
+  .geo-hero__mark { animation: geo-hover 7s ease-in-out infinite; }
+  .geo-hero__shadow { transform-origin: 260px 251px; animation: geo-shadow 7s ease-in-out infinite; }
+  .geo-hero__scan { animation: geo-survey 7s linear infinite; }
+  .geo-hero__terrain { animation: geo-surface 7s ease-in-out infinite; }
+}
+
+@keyframes geo-hover { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-12px); } }
+@keyframes geo-shadow { 0%, 100% { transform: scale(1); opacity: .12; } 50% { transform: scale(.8); opacity: .07; } }
+@keyframes geo-survey { from { stroke-dashoffset: 1; } to { stroke-dashoffset: 0; } }
+@keyframes geo-surface { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-4px); } }
+
+@media (min-width: 1600px) {
+  .geo-hero { padding: 48px 60px 28px; }
+}
+
+@media (max-width: 1023px) {
+  .geo-auth { grid-template-columns: .95fr 1fr; gap: 0; padding: 12px; }
+  .geo-hero { min-height: 680px; padding: 28px 24px 20px; }
+  .geo-hero__edition { display: none; }
+  .geo-hero__logo { width: 174px; }
+  .geo-auth__form { padding: 40px 24px; }
+}
+
+@media (max-width: 767px) {
+  .geo-auth { display: flex; flex-direction: column; gap: 0; padding: 12px; }
+  .geo-hero { flex-shrink: 0; min-height: 0; padding: 24px; border-radius: 20px; }
+  .geo-hero__logo { width: 154px; }
+  .geo-hero__art { width: 250px; max-width: 100%; align-self: center; margin: 12px 0 8px; }
+  .geo-hero__copy h2 { font-size: 28px; }
+  .geo-hero__description { margin: 16px 0; font-size: 13px; }
+  .geo-auth__form { flex-shrink: 0; padding: 36px 14px 40px; }
+}

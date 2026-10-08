@@ -108,7 +108,7 @@ const Profile = () => {
       <div className="flex flex-col gap-[22px]">
         <section className="relative overflow-hidden rounded-[14px] border border-[var(--border)] bg-[var(--surface)] p-5 shadow-[1px_0_0_var(--border),0_18px_44px_rgba(27,27,43,0.05)] sm:p-7 lg:p-9">
           <img
-            src="/brand/geosurvey-mark.png"
+            src={`${import.meta.env.BASE_URL}brand/geosurvey-mark.png`}
             alt=""
             aria-hidden="true"
             className="gs-drift pointer-events-none absolute -bottom-[40px] -right-[20px] w-[230px] opacity-[0.06]"

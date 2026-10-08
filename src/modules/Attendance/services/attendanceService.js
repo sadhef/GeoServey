@@ -1,11 +1,43 @@
 import axios from '../../../config/axios.js';
 import { parseOdooTimestamp, toApiDate } from '../../../shared/utils/date.js';
 
-/** Lists attendance punches between two dates (inclusive), newest first. */
-export const listAttendance = async ({ dateFrom, dateTo, limit = 62 }) => {
-  const data = await axios.get('/attendance/list', {
-    params: { date_from: toApiDate(dateFrom), date_to: toApiDate(dateTo), limit },
-  });
+/**
+ * Lists all attendance punches in an inclusive date range, newest first.
+ * @param {{dateFrom: Date, dateTo: Date}} range - Local calendar dates to query.
+ * @returns {Promise<Array<object>>} Attendance records with parsed timestamps.
+ * @throws {Error} When dates or response records are invalid, history is too large, or the request fails.
+ */
+export const listAttendance = async ({ dateFrom, dateTo }) => {
+  if (!(dateFrom instanceof Date) || !(dateTo instanceof Date) || !Number.isFinite(dateFrom.getTime()) || !Number.isFinite(dateTo.getTime())) {
+    throw new Error('Choose valid attendance dates.');
+  }
+  const from = toApiDate(dateFrom);
+  const to = toApiDate(dateTo);
+  if (from > to) throw new Error('The end date must be on or after the start date.');
+  let limit = 62;
+  let data;
+  do {
+    data = await axios.get('/attendance/list', {
+      params: { date_from: from, date_to: to, limit },
+    });
+    if (!data || !Array.isArray(data.records)) throw new Error('The server returned invalid attendance records.');
+    if (data.records.length >= limit && from < to) {
+      const start = new Date(dateFrom.getFullYear(), dateFrom.getMonth(), dateFrom.getDate());
+      const end = new Date(dateTo.getFullYear(), dateTo.getMonth(), dateTo.getDate());
+      const middle = new Date((start.getTime() + end.getTime()) / 2);
+      middle.setHours(0, 0, 0, 0);
+      const nextDay = new Date(middle);
+      nextDay.setDate(nextDay.getDate() + 1);
+      const [earlier, later] = await Promise.all([
+        listAttendance({ dateFrom: start, dateTo: middle }),
+        listAttendance({ dateFrom: nextDay, dateTo: end }),
+      ]);
+      return [...later, ...earlier].sort((a, b) => (b.checkIn?.getTime() || 0) - (a.checkIn?.getTime() || 0));
+    }
+    if (data.records.length < limit) break;
+    limit *= 2;
+    if (!Number.isSafeInteger(limit)) throw new Error('Attendance history is too large to load.');
+  } while (true);
   return data.records
     .map((r) => ({
       id: r.id,

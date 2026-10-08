@@ -26,7 +26,7 @@
     linear-gradient(135deg, #EEF4FB 0%, #F6F8FB 50%, #E9F3F9 100%);
   --glass-chrome: rgb(255 255 255 / 62%);
   --glass-sheen: rgb(255 255 255 / 34%);
-  /* Deep navy → cyan sweep shared by the login hero, the payroll highlight card and announcement tiles. */
+  /* Deep navy → cyan sweep used by the login hero. */
   --brand-sweep: linear-gradient(150deg, #1B2470 0%, #26308C 42%, #1E7FB4 100%);
 
   /* Navy used for solid chips (tab-active pill, avatar initials, modal header) that always pair

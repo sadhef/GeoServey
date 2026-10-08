@@ -138,7 +138,7 @@ export const MetricGrid = ({ metrics }) => (
           className="gs-fade relative overflow-hidden rounded-[14px] p-5 text-white"
           style={{ animationDelay: `${i * 0.05}s`, backgroundImage: 'var(--brand-sweep)' }}
         >
-          <img src="/brand/geosurvey-mark.png" alt="" aria-hidden="true" className="pointer-events-none absolute -bottom-[26px] -right-[18px] w-[150px] opacity-[0.16]" />
+          <img src={`${import.meta.env.BASE_URL}brand/geosurvey-mark.png`} alt="" aria-hidden="true" className="pointer-events-none absolute -bottom-[26px] -right-[18px] w-[150px] opacity-[0.16]" />
           <div className="relative text-[12.5px] font-bold uppercase tracking-[0.09em] text-[#8FD8F7]">{m.label}</div>
           <div className="relative mt-2 text-[28px] font-extrabold tabular-nums tracking-[-0.03em]">{m.value}</div>
           <div className="relative mt-1 text-[12.5px] text-white/70">{m.note}</div>
@@ -284,7 +284,7 @@ export const DataTable = ({ columns, rows, statusColumn }) => {
   );
 };
 
-/** Grid of content cards (documents, announcements, directory entries, help articles). */
+/** Grid of content cards (documents, directory entries, help articles). */
 export const CardGrid = ({ cards, columns = 3 }) => (
   <div className={`grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5 ${columns === 3 ? 'xl:grid-cols-3' : ''}`}>
     {cards.map((c, i) => (

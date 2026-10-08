@@ -1,22 +1,34 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { login as loginRequest, logout as logoutRequest } from '../../modules/auth/services/authService.js';
-import { setToken, clearToken } from '../../config/axios.js';
+import { getToken, setToken, clearToken } from '../../config/axios.js';
 
 const AuthContext = createContext(undefined);
 
 const EMPLOYEE_KEY = 'geosurvey-hrms-employee';
 const SESSION_EXPIRED_EVENT = 'auth:session-expired';
 
-/** Reads the employee identity persisted at login, or null if there is none/it's corrupt. */
+/** Restores a locally complete session; the API remains responsible for token validity. */
 const readStoredEmployee = () => {
-  const raw = window.localStorage.getItem(EMPLOYEE_KEY);
-  if (!raw) return null;
   try {
-    return JSON.parse(raw);
+    const token = getToken();
+    const raw = window.localStorage.getItem(EMPLOYEE_KEY);
+    if (typeof token === 'string' && token.trim() && token !== 'undefined' && token !== 'null' && raw) {
+      const employee = JSON.parse(raw);
+      if (Number.isSafeInteger(employee?.id) && employee.id > 0 && typeof employee.name === 'string' && employee.name.trim()) {
+        return employee;
+      }
+    }
   } catch {
-    return null;
+    // Corrupt or unavailable browser storage must not restore a signed-in state.
   }
+  try {
+    clearToken();
+    window.localStorage.removeItem(EMPLOYEE_KEY);
+  } catch {
+    // Browsers can block storage access; stay signed out in that case.
+  }
+  return null;
 };
 
 /**
@@ -45,6 +57,9 @@ export const AuthProvider = ({ children }) => {
     setLoading(true);
     try {
       const data = await loginRequest({ username, password });
+      if (!data || typeof data.token !== 'string' || !data.token.trim() || data.token === 'undefined' || data.token === 'null' || !Number.isSafeInteger(data.employee_id) || data.employee_id <= 0 || typeof data.employee_name !== 'string' || !data.employee_name.trim()) {
+        throw new Error('The server returned an invalid login response.');
+      }
       const employee = { id: data.employee_id, name: data.employee_name };
       setToken(data.token);
       window.localStorage.setItem(EMPLOYEE_KEY, JSON.stringify(employee));

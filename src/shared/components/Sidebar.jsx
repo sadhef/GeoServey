@@ -16,13 +16,6 @@ const NAV_GROUPS = [
     items: [
       { to: '/attendance', label: 'Attendance', icon: 'siteCheckIn' },
       { to: '/leave', label: 'Leave Requests', icon: 'calendar' },
-      { to: '/payslips', label: 'Payroll', icon: 'receipt' },
-    ],
-  },
-  {
-    label: 'Company',
-    items: [
-      { to: '/announcements', label: 'Announcements', icon: 'megaphone' },
     ],
   },
 ];
@@ -46,7 +39,7 @@ const Sidebar = ({ mobileOpen, onClose, onLogout }) => {
       ].join(' ')}
     >
       <img
-        src="/brand/geosurvey-mark.png"
+        src={`${import.meta.env.BASE_URL}brand/geosurvey-mark.png`}
         alt=""
         aria-hidden="true"
         className="gs-drift pointer-events-none absolute -bottom-[30px] -left-[46px] w-[210px] opacity-[0.05]"
@@ -62,8 +55,8 @@ const Sidebar = ({ mobileOpen, onClose, onLogout }) => {
       </button>
 
       <div className="relative px-2.5 pb-[22px] pt-0.5">
-        <img src="/brand/geosurvey-logo.png" alt="Geo Survey Tech" className="block w-[172px] dark:hidden" />
-        <img src="/brand/geosurvey-logo-white.png" alt="Geo Survey Tech" className="hidden w-[172px] dark:block" />
+        <img src={`${import.meta.env.BASE_URL}brand/geosurvey-logo.png`} alt="Geo Survey Tech" className="block w-[172px] dark:hidden" />
+        <img src={`${import.meta.env.BASE_URL}brand/geosurvey-logo-white.png`} alt="Geo Survey Tech" className="hidden w-[172px] dark:block" />
       </div>
       <div className="relative mx-2.5 mb-5 h-px bg-[var(--border)]" />
 
