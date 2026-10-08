@@ -27,7 +27,7 @@ spec:
               containerPort: 80
           readinessProbe:
             httpGet:
-              path: /hrms/geoservey/index.html
+              path: /gsthrms/index.html
               port: http
             initialDelaySeconds: 5
             periodSeconds: 5
@@ -71,12 +71,12 @@ spec:
   http:
     - match:
         - uri:
-            exact: /hrms/geoservey
+            exact: /gsthrms
       redirect:
-        uri: /hrms/geoservey/
+        uri: /gsthrms/
     - match:
         - uri:
-            prefix: /hrms/geoservey/
+            prefix: /gsthrms/
       route:
         - destination:
             host: geosurvey-frontend-svc.prod.svc.cluster.local

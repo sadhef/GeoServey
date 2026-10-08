@@ -121,7 +121,7 @@ pipeline {
 
     post {
         success {
-            echo 'Deployed Geo Survey: https://syncme.biztras.com/hrms/geoservey/'
+            echo 'Deployed Geo Survey: https://syncme.biztras.com/gsthrms/'
         }
     }
 }
