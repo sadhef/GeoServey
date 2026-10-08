@@ -10,7 +10,7 @@ pipeline {
     environment {
         APP_NAME = 'geosurvey-frontend'
         NAMESPACE = 'prod'
-        VITE_API_URL = 'https://biztras-test.odoo.com'
+        VITE_API_URL = 'https://geosurvey.odoo.com'
         BUILDKIT_HOST = 'unix:///run/buildkit/buildkitd.sock'
     }
 
