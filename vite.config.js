@@ -9,7 +9,7 @@ export default defineConfig(({ mode }) => {
   const allowedHostsList = ['syncme.biztras.com'];
 
   return {
-    base: '/geosurvey/',
+    base: '/hrms/',
     plugins: [react()],
     resolve: {
       alias: {
